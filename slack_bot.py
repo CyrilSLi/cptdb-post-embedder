@@ -23,7 +23,7 @@ def embed_to_slack(embed):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f'*<{embed["title_url"]}|{embed["title"]}>*\nby <{embed["author_url"]}|{embed["author_name"]}>\n\n{content}',
+                "text": f'*<{embed["title_url"]}|{embed["title"]}>*\nby <{embed["author_url"]}|{embed["author_name"]}>',
                 "verbatim": True
             }
         }
@@ -42,6 +42,7 @@ def embed_to_slack(embed):
             "image_url": image_proxy(embed["image"]),
             "alt_text": "Comment Image"
         })
+    blocks[0]["text"]["text"] += "\n\n\n" + content
     return blocks
 
 def main():
