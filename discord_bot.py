@@ -9,8 +9,6 @@ from dotenv import load_dotenv
 
 from utils import comment_to_embed
 
-load_dotenv()
-
 def embed_to_discord(embed):
     discord_embed = discord.Embed(
         title=embed["title"],
@@ -29,6 +27,7 @@ def embed_to_discord(embed):
     return discord_embed
 
 def main():
+    load_dotenv()
     bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
 
     class URLModal(discord.ui.Modal, title="CPTDB Post Embedder"):

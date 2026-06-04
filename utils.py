@@ -1,5 +1,6 @@
 # Built-in modules
 import re
+from urllib.parse import urlparse
 
 # Third-party modules
 import requests
@@ -7,10 +8,10 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
 def comment_to_embed(url):
-    if not re.fullmatch(r"https://cptdb.ca/topic/.+?#findComment-[0-9]+", url):
+    if not re.fullmatch(r"https://cptdb.ca/topic/.+?#(?:findComment|comment)-[0-9]+", url):
         return "Error: Invalid comment URL"
 
-    comment_id = url.split("#findComment-")[-1]
+    comment_id = urlparse(url).fragment.split("-")[-1]
 
     page = BeautifulSoup(requests.get(url).content, "html.parser")
 
@@ -24,7 +25,7 @@ def comment_to_embed(url):
         img.decompose()
 
     return {
-        "title": "CPTDB Comment",
+        "title": page.select_one("h1").text.strip() if page.select_one("h1") else "CPTDB Comment",
         "title_url": url,
         "author_name": comment.select_one("h3 a").text.strip() if comment.select_one("h3 a") else "Unknown Author",
         "author_img": comment.select_one(".cAuthorPane_photoWrap img")["src"] if comment.select_one(".cAuthorPane_photoWrap img") else None,

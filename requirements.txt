@@ -3,5 +3,7 @@ flask
 slack_bolt
 discord.py
 markdownify
+markdown-to-mrkdwn
 python-dotenv
 requests
+waitress
