@@ -1,4 +1,6 @@
 beautifulsoup4
+flask
+slack_bolt
 discord.py
 markdownify
 python-dotenv

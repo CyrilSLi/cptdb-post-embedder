@@ -6,7 +6,6 @@ import requests
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
-
 def comment_to_embed(url):
     if not re.fullmatch(r"https://cptdb.ca/topic/.+?#findComment-[0-9]+", url):
         return "Error: Invalid comment URL"
@@ -27,7 +26,7 @@ def comment_to_embed(url):
     return {
         "title": "CPTDB Comment",
         "title_url": url,
-        "author_name": comment.select_one("h3 a").text.strip() if comment.select_one("h3 a") else "Unknown",
+        "author_name": comment.select_one("h3 a").text.strip() if comment.select_one("h3 a") else "Unknown Author",
         "author_img": comment.select_one(".cAuthorPane_photoWrap img")["src"] if comment.select_one(".cAuthorPane_photoWrap img") else None,
         "author_url": comment.select_one("h3 a")["href"] if comment.select_one("h3 a") else None,
         "timestamp": comment.select_one("time")["datetime"] if comment.select_one("time") else None,
