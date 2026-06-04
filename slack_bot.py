@@ -42,7 +42,7 @@ def embed_to_slack(embed):
             "image_url": image_proxy(embed["image"]),
             "alt_text": "Comment Image"
         })
-    blocks[0]["text"]["text"] += "\n\n\n" + content
+    blocks[0]["text"]["text"] += "\n\n" + content
     return blocks
 
 def main():
