@@ -41,7 +41,11 @@ def html_to_markdown(html):
     markdown = re.sub(r"\n>", "\n> ", markdown) # Discord requires a space after ">" in blockquotes
     markdown = re.sub(r"!\[(.)\]\(.+?twemoji.+?\)", r"\1", markdown) # Remove emoji links
     markdown = markdown.replace("//cptdb.ca", "https://cptdb.ca") # Fix relative links
-    markdown = re.sub(r"\n+", "\n", markdown) # Remove extra newlines
-    markdown = re.sub(r"(?:\n> )+", "\n> ", markdown) # Remove extra newlines in blockquotes
+
+    markdown = re.sub(r"(?:\n *)+", "\n", markdown) # Remove extra newlines
+    markdown = re.sub(r"(?:\n> *)+", "\n> ", markdown) # Remove extra newlines in blockquotes
+
+    markdown = re.sub(r"\n +", "\n", markdown) # Remove spaces at the start of lines
+    markdown = re.sub(r"\n> +", "\n> ", markdown) # Remove spaces at the start of blockquote lines
 
     return markdown.strip()
