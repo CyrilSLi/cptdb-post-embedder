@@ -13,7 +13,7 @@ from waitress import serve
 from utils import * 
 
 def embed_to_slack(embed):
-    content = SlackMarkdownConverter().convert(embed["content"])
+    content = SlackMarkdownConverter().convert(embed["content"])[:3000] # Slack text block limit
     blocks = [
         {
             "type": "section",
