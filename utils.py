@@ -1,7 +1,7 @@
 # Built-in modules
 import os, re
 from base64 import b64decode
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, unquote, urlparse
 
 # Third-party modules
 import requests
@@ -58,7 +58,7 @@ def html_to_markdown(html):
 
 def dataURLsvg_to_png():
     try:
-        data_url = request.args.get("svg")
+        data_url = unquote(request.args.get("svg"))
         if ";base64," in data_url:
             svg_data = b64decode(data_url.split(";base64,", 1)[1])
         else:
