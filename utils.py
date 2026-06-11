@@ -49,15 +49,23 @@ def comment_to_embed(url):
 def html_to_markdown(html):
     markdown = md(html).strip()
 
-    markdown = re.sub(r"\n>", "\n> ", markdown) # Discord requires a space after ">" in blockquotes
+    markdown = re.sub(r"(\A|\n)[^\S\n]+", r"\1", markdown) # Remove spaces at the start of lines
+    markdown = re.sub(r"[^\S\n]+(\n|\Z)", r"\1", markdown) # Remove spaces at the end of lines
+    markdown = re.sub(r"(\A|\n)>[^\S\n]*", r"\1> ", markdown) # Ensure 1 space at the start of blockquote lines
+
     markdown = re.sub(r"!\[(.)\]\(.+?twemoji.+?\)", r"\1", markdown) # Remove emoji links
     markdown = markdown.replace("//cptdb.ca", "https://cptdb.ca") # Fix relative links
 
-    markdown = re.sub(r"(?:\n *)+", "\n", markdown) # Remove extra newlines
-    markdown = re.sub(r"(?:\n> *)+", "\n> ", markdown) # Remove extra newlines in blockquotes
+    # Remove extra newlines in blockquotes
+    markdown = re.sub(r"(\A|(?:\A|\s)\n)> (\n> )+", r"\1> ", markdown)
+    markdown = re.sub(r"(\n> )+(\Z|\n[^>])", r"\2", markdown)
 
-    markdown = re.sub(r"\n +", "\n", markdown) # Remove spaces at the start of lines
-    markdown = re.sub(r"\n> +", "\n> ", markdown) # Remove spaces at the start of blockquote lines
+
+    # These two regex remove extra newlines while preserving 2 newlines between blockquotes and between non-blockquotes to keep them separate.
+    markdown = re.sub(r"((?:\A|\n)> .*?)\n{3,}(> .*?(?:\n|\Z))", r"\1\n\n\2", markdown) # 2 newlines between two blockquotes
+    markdown = re.sub(r"((?:\A|\n)[^\s>].*?)\n{2,}(> .*?(?:\n|\Z))", r"\1\n\2", markdown) # 1 newline between non-blockquote and blockquote
+    markdown = re.sub(r"((?:\A|\n)> .*?)\n{2,}([^\s>].*?(?:\n|\Z))", r"\1\n\2", markdown) # 1 newline between blockquote and non-blockquote
+    markdown = re.sub(r"((?:\A|\n)[^\s>].*?)\n{3,}([^\s>].*?(?:\n|\Z))", r"\1\n\n\2", markdown) # 2 newlines between two non-blockquotes
 
     return markdown.strip()
 
