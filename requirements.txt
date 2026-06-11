@@ -1,5 +1,6 @@
 beautifulsoup4
 cairosvg
+diff-match-patch
 flask
 slack_bolt
 discord.py
