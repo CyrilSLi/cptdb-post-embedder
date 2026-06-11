@@ -25,7 +25,7 @@ def comment_to_embed(url):
     content = comment.select_one(f'div[data-role="commentContent"]') if comment else None
     if not content:
         return "Error: Comment not found"
-    
+
     embed_image = content.select_one("img.ipsImage")["src"] if content.select_one("img.ipsImage") else None
     for img in content.select("a .ipsImage"):
         img.decompose()
@@ -81,6 +81,6 @@ def image_proxy(url, use_http_proxy=True):
             return url
         return f"https://wsrv.nl/?url={quote(url)}"
     elif url.startswith("data:image/svg+xml"):
-        return os.getenv("FLASK_BASE_URL") + "/dataurlsvg?svg=" + quote(url)
+        return os.getenv("FLASK_BASE_URL") + "/dataurlsvg?svg=" + quote(unquote(url))
     else:
         return send_file("cptdb_logo.png", mimetype="image/png")
