@@ -65,15 +65,18 @@ def dataURLsvg_to_png():
     try:
         data_url = unquote(request.args.get("svg"))
         if ";base64," in data_url:
-            svg_data = b64decode(data_url.split(";base64,", 1)[1])
+            svg_data = b64decode(data_url.split(";base64,", 1)[1]).decode()
         else:
-            svg_data = data_url.split(",", 1)[1].encode()
-        background = re.search(r"background:#[0-9a-f]+", svg_data.decode())
+            svg_data = data_url.split(",", 1)[1]
+        svg_data = re.sub(r'font-family=".+?Roboto.+?"', 'font-family="Roboto"', svg_data)
+
+        background = re.search(r"background:#[0-9a-f]+", svg_data)
         if background:
             background = background.group(0).split(":")[1]
         else:
             background = "black"
-        return Response(svg2png(bytestring=svg_data, background_color=background, output_width=240, output_height=240), mimetype="image/png")
+
+        return Response(svg2png(bytestring=svg_data.encode(), background_color=background, output_width=240, output_height=240), mimetype="image/png")
     except Exception as e:
         return send_file("cptdb_logo.png", mimetype="image/png")
 
