@@ -56,7 +56,9 @@ def main():
             unfurls = {}
             for link in event["links"]:
                 embed = comment_to_embed(link["url"])
-                if not isinstance(embed, str):
+                if isinstance(embed, str):
+                    unfurls[link["url"]] = {"text": embed}
+                else:
                     unfurls[link["url"]] = {"blocks": embed_to_slack(embed)}
             if unfurls:
                 client.chat_unfurl(

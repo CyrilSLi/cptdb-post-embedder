@@ -19,7 +19,12 @@ def comment_to_embed(url):
 
     comment_id = urlparse(url).fragment.split("-")[-1]
 
-    page = BeautifulSoup(requests.get(url).content, "html.parser")
+    resp = requests.get(url)
+    if resp.status_code == 403:
+        return "Error: Unable to access comment (likely a topic that requires an account to view)"
+    elif resp.status_code != 200:
+        return f"Error: Unable to access comment (HTTP {resp.status_code})"
+    page = BeautifulSoup(resp.content, "html.parser")
 
     comment = page.select_one(f"article#elComment_{comment_id}")
     content = comment.select_one(f'div[data-role="commentContent"]') if comment else None
