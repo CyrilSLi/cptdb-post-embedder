@@ -13,7 +13,7 @@ from markdownify import markdownify as md
 
 from minimal_dmp import minimal_dmp
 
-__all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy", "truncate_text"]
+__all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy", "truncate_text", "proj_path"]
 
 def comment_to_embed(url):
     if not re.fullmatch(r"https://cptdb.ca/topic/.+?#(?:findComment|comment)-[0-9]+", url):
@@ -75,7 +75,7 @@ def dataURLsvg_to_png():
     try:
         if "diff" in request.args and "v" in request.args:
             dmp = minimal_dmp()
-            with open("dataurlsvg_templates.txt") as f:
+            with open(proj_path("dataurlsvg_templates.txt")) as f:
                 template = f.readlines()[int(request.args.get("v"))].strip()
                 svg_data = dmp.patch(template, request.args.get("diff")).strip()
         elif "svg" in request.args:
@@ -112,7 +112,7 @@ def image_proxy(url, use_http_proxy=True):
 
     elif url.startswith("data:image/svg+xml"):
         try:
-            with open("dataurlsvg_templates.txt") as f: # Use diff-match-patch to find a shorter representation of the SVG
+            with open(proj_path("dataurlsvg_templates.txt")) as f: # Use diff-match-patch to find a shorter representation of the SVG
                 diffs = []
                 unquoted_url = unquote(url)
                 dmp = minimal_dmp()
@@ -133,3 +133,6 @@ def truncate_text(text, limit):
     if len(text) <= limit:
         return text
     return text[:limit-3] + "..."
+
+def proj_path (file):
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), file)
