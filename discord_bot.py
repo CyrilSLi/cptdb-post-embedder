@@ -15,7 +15,7 @@ def embed_to_discord(embed):
     discord_embed = discord.Embed(
         title=embed["title"],
         url=embed["title_url"],
-        description=embed["content"][:4096], # Discord embed description limit
+        description=truncate_text(embed["content"], 4096), # Discord embed description limit
         color=0x2f323a,
         timestamp=datetime.fromisoformat(embed["timestamp"]) if embed["timestamp"] else None
     )

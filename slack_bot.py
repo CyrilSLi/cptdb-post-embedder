@@ -38,7 +38,7 @@ def embed_to_slack(embed):
             "image_url": image_proxy(embed["image"]),
             "alt_text": "Comment Image"
         })
-    blocks[0]["text"]["text"] = (blocks[0]["text"]["text"] + "\n\n" + content)[:3000] # Slack text block limit
+    blocks[0]["text"]["text"] = truncate_text(blocks[0]["text"]["text"] + "\n\n" + content, 3000) # Slack text block limit
     return blocks
 
 def main():

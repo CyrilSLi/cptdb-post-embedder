@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from flask import request, Response, send_file
 from markdownify import markdownify as md
 
-__all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy"]
+__all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy", "truncate_text"]
 
 def comment_to_embed(url):
     if not re.fullmatch(r"https://cptdb.ca/topic/.+?#(?:findComment|comment)-[0-9]+", url):
@@ -100,3 +100,8 @@ def image_proxy(url, use_http_proxy=True):
         return os.getenv("FLASK_BASE_URL") + "/dataurlsvg?svg=" + quote(unquote(url))
     else:
         return send_file("cptdb_logo.png", mimetype="image/png")
+
+def truncate_text(text, limit):
+    if len(text) <= limit:
+        return text
+    return text[:limit-3] + "..."
