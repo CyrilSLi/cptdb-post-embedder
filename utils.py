@@ -1,11 +1,17 @@
 # Built-in modules
-import re
-from urllib.parse import urlparse
+import os, re
+from base64 import b64decode
+from urllib.parse import quote, urlparse
 
 # Third-party modules
 import requests
 from bs4 import BeautifulSoup
+from cairosvg import svg2png
+from dotenv import load_dotenv
+from flask import request, Response, send_file
 from markdownify import markdownify as md
+
+__all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy"]
 
 def comment_to_embed(url):
     if not re.fullmatch(r"https://cptdb.ca/topic/.+?#(?:findComment|comment)-[0-9]+", url):
@@ -49,3 +55,32 @@ def html_to_markdown(html):
     markdown = re.sub(r"\n> +", "\n> ", markdown) # Remove spaces at the start of blockquote lines
 
     return markdown.strip()
+
+def dataURLsvg_to_png():
+    try:
+        data_url = request.args.get("svg")
+        if ";base64," in data_url:
+            svg_data = b64decode(data_url.split(";base64,", 1)[1])
+        else:
+            svg_data = data_url.split(",", 1)[1].encode()
+        background = re.search(r"background:#[0-9a-f]+", svg_data.decode())
+        if background:
+            background = background.group(0).split(":")[1]
+        else:
+            background = "black"
+        return Response(svg2png(bytestring=svg_data, background_color=background, output_width=240, output_height=240), mimetype="image/png")
+    except Exception as e:
+        return send_file("cptdb_logo.png", mimetype="image/png")
+
+def image_proxy(url, use_http_proxy=True):
+    load_dotenv()
+    if not url:
+        return None
+    elif url.startswith("http"):
+        if url.startswith("https://wsrv.nl/") or not use_http_proxy:
+            return url
+        return f"https://wsrv.nl/?url={quote(url)}"
+    elif url.startswith("data:image/svg+xml"):
+        return os.getenv("FLASK_BASE_URL") + "/dataurlsvg?svg=" + quote(url)
+    else:
+        return send_file("cptdb_logo.png", mimetype="image/png")

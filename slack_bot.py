@@ -1,20 +1,16 @@
 # Built-in modules
 import os
 from datetime import datetime
-from urllib.parse import quote
-from waitress import serve
 
 # Third-party modules
 from dotenv import load_dotenv
+from flask import Flask, request
 from markdown_to_mrkdwn import SlackMarkdownConverter
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import Flask, request
+from waitress import serve
 
-from utils import comment_to_embed
-
-def image_proxy(url):
-    return f"https://wsrv.nl/?url={quote(url)}"
+from utils import * 
 
 def embed_to_slack(embed):
     content = SlackMarkdownConverter().convert(embed["content"])
@@ -75,8 +71,10 @@ def main():
     @flask_app.route("/slack/events", methods=["POST"])
     def slack_events():
         return handler.handle(request)
-    
-    serve(flask_app, host="0.0.0.0", port=27832)
+
+    flask_app.route("/dataurlsvg", methods=["GET"])(dataURLsvg_to_png)
+
+    serve(flask_app, host="0.0.0.0", port=int(os.getenv("FLASK_PORT")))
 
 if __name__ == "__main__":
     main()

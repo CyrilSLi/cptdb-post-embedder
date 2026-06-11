@@ -1,13 +1,15 @@
 # Built-in modules
-import os
+import os, socket, threading
 from datetime import datetime
 
 # Third-party modules
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from flask import Flask
+from waitress import serve
 
-from utils import comment_to_embed
+from utils import *
 
 def embed_to_discord(embed):
     discord_embed = discord.Embed(
@@ -20,7 +22,7 @@ def embed_to_discord(embed):
     discord_embed.set_author(
         name=embed["author_name"],
         url=embed["author_url"],
-        icon_url=embed["author_img"]
+        icon_url=image_proxy(embed["author_img"], use_http_proxy=False)
     )
     if embed["image"]:
         discord_embed.set_image(url=embed["image"])
@@ -52,6 +54,12 @@ def main():
     async def on_ready():
         await bot.tree.sync()
         print(f"Logged in as {bot.user}")
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if s.connect_ex(("localhost", int(os.getenv("FLASK_PORT")))) != 0:
+            flask_app = Flask(__name__)
+            flask_app.route("/dataurlsvg", methods=["GET"])(dataURLsvg_to_png)
+            threading.Thread(target=lambda: serve(flask_app, host="0.0.0.0", port=int(os.getenv("FLASK_PORT"))), daemon=True).start()
 
     bot.run(os.getenv("DISCORD_TOKEN"))
 
