@@ -16,7 +16,7 @@ from minimal_dmp import minimal_dmp
 __all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy", "truncate_text", "proj_path"]
 
 def comment_to_embed(url):
-    if not re.fullmatch(r"https://cptdb.ca/topic/.+?#(?:findComment|comment)-[0-9]+", url):
+    if not re.fullmatch(r"https://cptdb.ca/topic/.+?#(?:findComment-|comment-|comment=)[0-9]+", url):
         return "Error: Invalid comment URL"
 
     comment_id = urlparse(url).fragment.split("-")[-1]
