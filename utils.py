@@ -19,7 +19,7 @@ def comment_to_embed(url):
     if not re.fullmatch(r"https://cptdb.ca/topic/.+?(?:#findComment-|#comment-|&comment=)[0-9]+", url):
         return "Error: Invalid comment URL"
 
-    comment_id = urlparse(url).fragment.split("-")[-1]
+    comment_id = urlparse(url).fragment.split("-")[-1].split("=")[-1]
 
     resp = requests.get(url)
     if resp.status_code == 403:
