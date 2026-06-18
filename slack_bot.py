@@ -1,5 +1,5 @@
 # Built-in modules
-import os
+import html, os
 from datetime import datetime
 
 # Third-party modules
@@ -55,7 +55,7 @@ def main():
         try:
             unfurls = {}
             for link in event["links"]:
-                embed = comment_to_embed(link["url"])
+                embed = comment_to_embed(html.unescape(link["url"]))
                 if isinstance(embed, str):
                     unfurls[link["url"]] = {"text": embed}
                 else:
