@@ -16,10 +16,10 @@ from minimal_dmp import minimal_dmp
 __all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy", "truncate_text", "proj_path"]
 
 def comment_to_embed(url):
-    if not re.fullmatch(r"https://cptdb.ca/topic/.+?(?:#findComment-|#comment-|&comment=)[0-9]+", url):
+    comment_id = re.fullmatch(r"https://cptdb.ca/topic/.+?(?:#findComment-|#comment-|&comment=)([0-9]+)", url)
+    if not comment_id:
         return "Error: Invalid comment URL"
-
-    comment_id = urlparse(url).fragment.split("-")[-1].split("=")[-1]
+    comment_id = comment_id.group(1)
 
     resp = requests.get(url)
     if resp.status_code == 403:
