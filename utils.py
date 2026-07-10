@@ -18,6 +18,9 @@ __all__ = ["comment_to_embed", "dataURLsvg_to_png", "image_proxy", "truncate_tex
 def comment_to_embed(url):
     comment_id = re.fullmatch(r"https://cptdb.ca/topic/.+?(?:#findComment-|#comment-|&comment=)([0-9]+)", url)
     if not comment_id:
+        article_id = re.fullmatch(r"https://cptdb.ca/wiki/index.php/(.+)", url)
+        if article_id:
+            return wiki_to_embed(article_id.group(1))
         return "Error: Invalid comment URL"
     comment_id = comment_id.group(1)
 
@@ -48,15 +51,56 @@ def comment_to_embed(url):
         "content": html_to_markdown(str(content))
     }
 
+def wiki_to_embed(article):
+    resp = requests.get(f"https://cptdb.ca/wiki/api.php?action=parse&page={article}&format=json")
+    if resp.status_code != 200:
+        return f"Error: Unable to access wiki article (HTTP {resp.status_code})"
+    resp = resp.json()["parse"]
+    page = BeautifulSoup(resp["text"]["*"], "html.parser")
+    content = page.select_one("div.mw-parser-output")
+
+    cover_image = None
+    first_el = next(content.children)
+    if first_el.name == "table":
+        if first_el.select_one("img"):
+            cover_image = "https://cptdb.ca" + first_el.select_one("img")["src"]
+        first_el.decompose()
+    
+    for el in content.children:
+        if el.name != "p":
+            el.decompose()
+        else:
+            break
+
+    non_p = content.select_one("div.mw-parser-output > :not(p)")
+    if non_p:
+        for el in non_p.find_next_siblings():
+            el.decompose()
+        non_p.decompose()
+
+    return {
+        "title": resp["title"],
+        "title_url": f"https://cptdb.ca/wiki/index.php/{article}",
+        "author_name": "CPTDB Wiki",
+        "author_img": None,
+        "author_url": "https://cptdb.ca/wiki/index.php/Main_Page",
+        "timestamp": None,
+        "image": cover_image,
+        "content": html_to_markdown(str(content))
+    }
+
 def html_to_markdown(html):
     markdown = md(html).strip()
+
+    markdown = re.sub(r'(\[[^\]]+\]\([^)\s]+)\s+"[^"]+"\)', r"\1)", markdown) # Remove title from links
 
     markdown = re.sub(r"(\A|\n)[^\S\n]+", r"\1", markdown) # Remove spaces at the start of lines
     markdown = re.sub(r"[^\S\n]+(\n|\Z)", r"\1", markdown) # Remove spaces at the end of lines
     markdown = re.sub(r"(\A|\n)>[^\S\n]*", r"\1> ", markdown) # Ensure 1 space at the start of blockquote lines
 
     markdown = re.sub(r"!\[(.)\]\(.+?twemoji.+?\)", r"\1", markdown) # Remove emoji links
-    markdown = markdown.replace("//cptdb.ca", "https://cptdb.ca") # Fix relative links
+    markdown = re.sub(r"\[(.+?)\]\(.+?\/uploads\/emoticons\/.+?\)", r"\1", markdown) # Remove emoticon links
+    markdown = markdown.replace("//cptdb.ca", "https://cptdb.ca").replace("/wiki", "https://cptdb.ca/wiki") # Fix relative links
 
     # Remove extra newlines in blockquotes
     markdown = re.sub(r"(\A|(?:\A|\s)\n)> (\n> )+", r"\1> ", markdown)
